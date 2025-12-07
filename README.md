@@ -2,27 +2,28 @@
 
 **Robust Adaptive Nonsingular Fast Terminal Sliding Mode Control for Quadrotor UAV Trajectory Tracking**
 
-A comprehensive implementation of the RANFTSMC algorithm from Labbadi & Cherkaoui (ISA Transactions, 2020) for robust quadrotor control under uncertainties and external disturbances. This repository contains Python simulations, ROS2 integration, and hardware experimental validation.
+A comprehensive implementation of the RANFTSMC algorithm from Labbadi & Cherkaoui (ISA Transactions, 2020) for robust quadrotor control under uncertainties and external disturbances. This repository contains Python simulations and hardware experimental validation on DJI Tello.
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Features](#features)
-- [Repository Structure](#repository-structure)
-- [Installation](#installation)
-- [Usage](#usage)
-  - [Python Simulation](#python-simulation)
-  - [ROS2 Integration](#ros2-integration)
-- [ROS2 Gazebo Results](#ros2-gazebo-results)
-- [Hardware Flight Tests](#hardware-flight-tests)
+- [Part 1: Python Simulation](#part-1-python-simulation)
+  - [Simulation Features](#simulation-features)
+  - [Simulation Installation](#simulation-installation)
+  - [Simulation Usage](#simulation-usage)
+  - [Simulation Results](#simulation-results)
+- [Part 2: Hardware Implementation](#part-2-hardware-implementation)
+  - [Hardware Features](#hardware-features)
+  - [Hardware Installation](#hardware-installation)
+  - [Hardware Usage](#hardware-usage)
+  - [Hardware Results](#hardware-results)
 - [Citation](#citation)
-- [License](#license)
 
 ---
 
-### Overview
+## Overview
 
 This project implements a **Robust Adaptive Nonsingular Fast Terminal Sliding Mode Controller (RANFTSMC)** for quadrotor UAVs, addressing key challenges in autonomous flight:
 
@@ -31,16 +32,16 @@ This project implements a **Robust Adaptive Nonsingular Fast Terminal Sliding Mo
 - **Chattering elimination** through smooth approximation
 - **Real-time implementation** on embedded hardware
 
-The implementation progresses through three stages:
+The implementation progresses through two stages:
 1. **Simulation**: Python-based validation with comprehensive scenario testing
-2. **ROS2 Integration**: Gazebo simulation with communication protocols
-3. **Hardware Testing**: Real quadrotor flights with onboard computation
+2. **Hardware Testing**: Real quadrotor flights on DJI Tello
 
 ---
 
-### Features
+# Part 1: Python Simulation
 
-### Simulation Framework
+## Simulation Features
+
 - **Multiple Trajectory Types**: Figure-8, circular, square, complex multi-segment, space figure-8
 - **Disturbance Models**: Constant, time-varying, aggressive (matching paper scenarios)
 - **Performance Metrics**: ISE, RMSE, IAE, maximum error tracking
@@ -48,95 +49,65 @@ The implementation progresses through three stages:
 - **Adaptive Control**: Real-time parameter estimation with gain saturation
 - **CLI Interface**: Easy scenario selection and parameter tuning
 
----
-
-### Repository Structure
+### Repository Structure - Simulation
 
 ```
-quadrotor-ranftsmc-control/
-│
-├── python_simulation/          # Pure Python implementation
-│   ├── main.py                 # Main simulation entry point
-│   ├── RANFTSMController.py    # RANFTSMC controller implementation
-│   ├── QuadrotorSimulator.py   # Quadrotor dynamics and simulation
-│   ├── Generators.py           # Trajectory and disturbance generators
-│   ├── Params.py               # System and controller parameters
-│   ├── PerformanceMetrics.py   # Metric calculation (ISE, RMSE, etc.)
-│   └── Plotter.py              # Visualization utilities
-│
-├── ros2_workspace/             # ROS2 packages 
-│   └── TODO
-│
-├── hardware/                   # Hardware implementation 
-│   └── TODO
-│
-├── LICENSE                     # MIT License
-└── README.md                   # This file
+Python Simulation/
+├── main.py                     # Main simulation entry point
+├── RANFTSMController.py        # RANFTSMC controller implementation
+├── QuadrotorSimulator.py       # Quadrotor dynamics and simulation
+├── Generators.py               # Trajectory and disturbance generators
+├── Params.py                   # System and controller parameters
+├── PerformanceMetrics.py       # Metric calculation (ISE, RMSE, etc.)
+└── Plotter.py                  # Visualization utilities
 ```
 
 ---
 
-### Installation
+## Simulation Installation
 
 ### Prerequisites
 
-- **Python 3.8+** (for simulation)
-- **ROS2 Humble** (for integration and hardware)
+- **Python 3.8+**
 
-### Python Simulation Setup
+### Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/quadrotor-ranftsmc-control.git
-cd quadrotor-ranftsmc-control
+git clone https://github.com/Ghaith-Chamaa/Quadrotor-RANFTSMC-Control-System
+cd Quadrotor-RANFTSMC-Control-System
 
 # Install Python dependencies
 pip install numpy matplotlib
 ```
 
-### ROS2 Workspace Setup (TODO)
-
-```bash
-# Source ROS2
-source /opt/ros/humble/setup.bash
-
-# Build workspace
-cd ros2_workspace
-colcon build --symlink-install
-
-# Source workspace
-source install/setup.bash
-```
-
 ---
 
-### 🎮 Usage
+## Simulation Usage
 
-### Python Simulation
-
-#### Quick Start - Paper Scenarios
+### Quick Start - Paper Scenarios
 
 Run the predefined scenarios from the paper:
 
 ```bash
 # Simulation 1: Square trajectory, no disturbances
-python python_simulation/main.py --scenario sim1 --verbose
+python "Python Simulation/main.py" --scenario sim1 --verbose
 
 # Simulation 2: Circular trajectory, constant disturbances  
-python python_simulation/main.py --scenario sim2 --verbose
+python "Python Simulation/main.py" --scenario sim2 --verbose
 
 # Simulation 3: Complex trajectory, time-varying disturbances
-python python_simulation/main.py --scenario sim3 --verbose --save results/sim3.png
+python "Python Simulation/main.py" --scenario sim3 --verbose
 
 # Simulation 5: Space figure-8, aggressive disturbances
-python python_simulation/main.py --scenario sim5 --verbose
+python "Python Simulation/main.py" --scenario sim5 --verbose
 ```
 
-#### Custom Configuration
+### Custom Configuration
 
 ```bash
 # Custom trajectory with specific initial conditions
-python python_simulation/main.py \
+python "Python Simulation/main.py" \
     --trajectory circle \
     --disturbance time_varying \
     --initial "0.5,0,1.0,0,0,0.2" \
@@ -146,7 +117,7 @@ python python_simulation/main.py \
     --save my_experiment.png
 ```
 
-#### Available Options
+### Available Options
 
 | Argument | Choices | Description |
 |----------|---------|-------------|
@@ -155,30 +126,245 @@ python python_simulation/main.py \
 | `--disturbance` | none, constant, time_varying, aggressive | Disturbance type |
 | `--initial` | "x,y,z,φ,θ,ψ" | Initial conditions (comma-separated) |
 | `--time` | float | Simulation duration (seconds) |
-| `--dt` | float | Time step for RK approximiation (default: 0.01s) |
+| `--dt` | float | Time step for RK approximation (default: 0.01s) |
 | `--verbose` | flag | Detailed output and metrics |
 | `--save` | filename | Save plots to file |
 
-### ROS2 Integration
+---
 
+## Simulation Results
+
+### Visualization
+
+The following result is after executing:
 ```bash
+python main.py --trajectory complex --disturbance time_varying
+``` 
+
+<p align="center">
+  <img src="assets/sim_1.png" alt="3D Trajectory Simulation" /><br>
+  <em>Figure 1: 3D Trajectory Simulation</em>
+</p>
+
+<br>
+
+<p align="center">
+  <img src="assets/sim_2.png" alt="Trajectory Errors Simulation" /><br>
+  <em>Figure 2: 3D Trajectory Simulation</em>
+</p>
+
+### Performance Metrics
+
+The simulation framework calculates comprehensive metrics matching the paper's Table 4:
+
+- **ISE** (Integral Square Error)
+- **RMSE** (Root Mean Square Error)
+- **IAE** (Integral Absolute Error)
+- **Maximum Absolute Error**
+
+Example output:
+```
+PERFORMANCE METRICS (ISA Transactions Format)
+============================================================
+Integral Square Error (ISE) - Table 4:
+  Position:
+    x:     0.0234
+    y:     0.0189
+    z:     3.2e-05
+  Attitude:
+    φ:     0.0123
+    θ:     0.0098
+    ψ:     0.0156
+
+Root Mean Square Error (RMSE):
+  Position:
+    x:     0.0456 m
+    y:     0.0389 m
+    z:     0.0012 m
+  Attitude:
+    φ:     0.0234 rad (1.34°)
+    θ:     0.0198 rad (1.13°)
+    ψ:     0.0289 rad (1.66°)
+```
+
+---
+
+# Part 2: Hardware Implementation
+
+## Hardware Features
+
+- **Platform**: DJI Ryze Tello drone
+- **Control Architecture**: Axis-specific RANFTSMC with independent parameter tuning
+- **Key Capabilities**:
+  - Direct velocity commands with body-to-world frame transformations
+  - Dead reckoning position estimation with barometer fusion
+  - Real-time trajectory tracking with configurable workspace bounds
+  - Comprehensive flight data logging and analysis tools
+  - Safety limits and emergency stop functionality
+
+### Repository Structure - Hardware
 
 ```
+DJI Tello Hardware Experiment/
+├── main.py                     # Flight control entry point
+├── Controller.py               # Axis-specific RANFTSMC controller
+├── TelloInterface.py           # Hardware interface and state estimation
+├── Trajectory.py               # Workspace-bounded trajectory generators
+├── Params.py                   # Hardware-tuned parameters
+├── PerformanceMetrics.py       # Flight metrics calculation
+└── analyze_flight.py           # Post-flight data analysis tool
+```
+
 ---
 
-### ROS2 Gazebo Results
+## Hardware Installation
+
+### Prerequisites
+
+- **Python 3.8+**
+- **DJI Ryze Tello drone**
+
+### Setup
+
+```bash
+# Install additional dependencies for Tello
+pip install djitellopy
+
+# Ensure Tello is charged and powered on
+# Connect to Tello WiFi network (TELLO-XXXXXX)
+```
 
 ---
 
-### Hardware Flight Tests
+## Hardware Usage
+
+### Quick Start
+
+```bash
+# Connect to Tello WiFi first, then run:
+
+# Hovering trajectory (safe for first flight)
+python "DJI Tello Hardware Experiment/main.py" \
+    --trajectory hover \
+    --duration 20 \
+    --debug
+
+# Circular trajectory with small workspace
+python "DJI Tello Hardware Experiment/main.py" \
+    --trajectory circle \
+    --workspace-size 0.5 \
+    --duration 30 \
+    --save-data
+
+# Complex trajectory (paper-based)
+python "DJI Tello Hardware Experiment/main.py" \
+    --trajectory complex \
+    --workspace-size 0.8 \
+    --duration 60 \
+    --debug \
+    --save-data
+```
+
+### Available Options
+
+| Argument | Choices | Description |
+|----------|---------|-------------|
+| `--trajectory` | complex, hover, circle | Trajectory type |
+| `--workspace-size` | 0.15-1.0 | Workspace cube size in meters |
+| `--duration` | float | Flight duration (seconds) |
+| `--debug` | flag | Enable debug output |
+| `--save-data` | flag | Save flight data to .npz file |
+
+### Post-Flight Analysis
+
+After a flight with `--save-data`, analyze the results:
+
+```bash
+# Analyze flight data
+python "DJI Tello Hardware Experiment/analyze_flight.py" \
+    flight_data_hybrid_YYYYMMDD_HHMMSS.npz \
+    --save analysis_results.png
+
+# Statistics only (no plots)
+python "DJI Tello Hardware Experiment/analyze_flight.py" \
+    flight_data_hybrid_YYYYMMDD_HHMMSS.npz \
+    --no-plot
+```
+
+### Safety Guidelines
+
+**Important Safety Notes:**
+- Always fly in an open, indoor space away from obstacles
+- Maintain visual line of sight with the drone
+- Keep workspace-size ≤ 0.8m for confined spaces
+- Monitor battery levels (lands automatically at 15%)
+- Have emergency stop ready (Ctrl+C)
+- Test with `hover` trajectory first
 
 ---
 
-### Citation
+## Hardware Results
 
-If you use this code in your research, please cite the original authors:
+> **Note**: The current hardware results and controller parameters are optimized for **workspace-size = 0.3m**. These parameters provide stable tracking performance for small-scale indoor flights. For larger workspaces, parameter tuning is required.
 
-**Original Paper**:
+The following result is after executing:
+```bash
+python main.py workspace_size 0.3 and duration 50
+``` 
+
+### Video Demonstrations
+
+<p align="center">
+  <img src="assets/flight.mp4" alt="Test Flight" /><br>
+  <em>Test Flight</em>
+</p>
+
+### Visualization
+
+<p align="center">
+  <img src="assets/hardware.png" alt="Hardware Flight 3D Trajectory" /><br>
+  <em>Figure 3: desired vs actual path (workspace-size=0.3m)</em>
+</p>
+
+
+### Key Hardware Results (workspace-size = 0.3m)
+
+The DJI Tello implementation demonstrates:
+
+- **Position Tracking**: RMSE < 0.15m in XY, < 0.08m in Z
+- **Control Rate**: 80 Hz
+- **Workspace Scaling**: Tested at approx 0.3m³ volume
+- **Safety**: Comprehensive bounds checking and emergency stop
+
+Example flight statistics:
+```
+FLIGHT STATISTICS
+======================================================================
+Flight Duration: 45.23 seconds
+Data Points: 906
+Average Sample Rate: 80.0 Hz
+Workspace Size: 0.3m
+
+Performance Metrics:
+  RMSE (Root Mean Square Error):
+    X: 0.1234 m
+    Y: 0.0987 m
+    Z: 0.0654 m
+
+  Maximum Error:
+    X: 0.2345 m
+    Y: 0.1987 m
+    Z: 0.1234 m
+
+✓ All safety limits respected
+```
+
+---
+
+## Citation
+
+If you use this code in your research, please cite the original paper:
+
 ```bibtex
 @article{labbadi2020robust,
   title={Robust adaptive nonsingular fast terminal sliding-mode tracking control for an uncertain quadrotor UAV subjected to disturbances},
@@ -191,10 +377,4 @@ If you use this code in your research, please cite the original authors:
 }
 ```
 
----
-
-### License
-
-This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
-
----
+**Reference**: Labbadi, M., & Cherkaoui, M. (2020). Robust adaptive nonsingular fast terminal sliding-mode tracking control for an uncertain quadrotor UAV subjected to disturbances. *ISA Transactions*, 99, 290-304.
