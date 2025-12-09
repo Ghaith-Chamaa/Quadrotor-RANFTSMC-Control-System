@@ -305,7 +305,7 @@ python "DJI Tello Hardware Experiment/analyze_flight.py" \
 
 ## Hardware Results
 
-> **Note**: The current hardware results and controller parameters are optimized for **workspace-size = 0.3m**. These parameters provide stable tracking performance for small-scale indoor flights. For larger workspaces, parameter tuning is required.
+> **Note**: The current hardware results and controller parameters are optimized for **workspace-size = 0.3** (30% of paper's trajectory). These parameters provide stable tracking performance for small-scale indoor flights. For larger workspaces, parameter tuning is required.
 
 The following result is after executing:
 ```bash
@@ -323,17 +323,17 @@ python main.py workspace_size 0.3 and duration 50
 
 <p align="center">
   <img src="assets/hardware.png" alt="Hardware Flight 3D Trajectory" /><br>
-  <em>Figure 3: desired vs actual path (workspace-size=0.3m)</em>
+  <em>Figure 3: desired vs actual path (workspace-size=0.3)</em>
 </p>
 
 
-### Key Hardware Results (workspace-size = 0.3m)
+### Key Hardware Results (workspace-size = 0.3)
 
 The DJI Tello implementation demonstrates:
 
 - **Position Tracking**: RMSE < 0.15m in XY, < 0.08m in Z
 - **Control Rate**: 80 Hz
-- **Workspace Scaling**: Tested at approx 0.3m³ volume
+- **Workspace Scaling**: Tested at 0.3 X paper's scale(3m³) $\approx$ 1m³ volume
 - **Safety**: Comprehensive bounds checking and emergency stop
 
 Example flight statistics:
@@ -343,7 +343,7 @@ FLIGHT STATISTICS
 Flight Duration: 45.23 seconds
 Data Points: 906
 Average Sample Rate: 80.0 Hz
-Workspace Size: 0.3m
+Workspace Size: 0.3
 
 Performance Metrics:
   RMSE (Root Mean Square Error):
