@@ -314,8 +314,9 @@ python main.py workspace_size 0.3 and duration 50
 
 ### Video Demonstrations
 
+
+https://github.com/user-attachments/assets/74f13c21-2804-4252-9da2-2fbcdde069a2
 <p align="center">
-  <img src="assets/flight.mp4" alt="Test Flight" /><br>
   <em>Test Flight</em>
 </p>
 
