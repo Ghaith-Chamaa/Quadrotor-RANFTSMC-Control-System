@@ -138,24 +138,39 @@ python "Python Simulation/main.py" \
 
 The following result is after executing:
 ```bash
-python main.py --trajectory complex --disturbance time_varying
+python main.py --trajectory complex --disturbance none
 ``` 
 
 <p align="center">
-  <img src="assets/sim_1.png" alt="3D Trajectory Simulation" /><br>
-  <em>Figure 1: 3D Trajectory Simulation</em>
+  <img src="assets/sim_none.png" alt="3D Trajectory Simulation without disturbance" /><br>
+  <em>Figure 1: 3D Trajectory Simulation without disturbance</em>
 </p>
+
+The following result is after executing:
+```bash
+python main.py --trajectory complex --disturbance constant
+``` 
 
 <br>
 
 <p align="center">
-  <img src="assets/sim_2.png" alt="Trajectory Errors Simulation" /><br>
-  <em>Figure 2: 3D Trajectory Simulation</em>
+  <img src="assets/sim_constant.png" alt="3D Trajectory Simulation with constant disturbance" /><br>
+  <em>Figure 2: 3D Trajectory Simulation with constant disturbance</em>
+</p>
+
+The following result is after executing:
+```bash
+python main.py --trajectory complex --disturbance time_varying
+``` 
+
+<p align="center">
+  <img src="assets/sim_var.png" alt="3D Trajectory Simulation with time varying disturbance" /><br>
+  <em>Figure 3: 3D Trajectory Simulation with time varying disturbance</em>
 </p>
 
 ### Performance Metrics
 
-The simulation framework calculates comprehensive metrics matching the paper's Table 4:
+The simulation framework calculates comprehensive metrics matching the paper's ISE Table 4 in addition to:
 
 - **ISE** (Integral Square Error)
 - **RMSE** (Root Mean Square Error)
