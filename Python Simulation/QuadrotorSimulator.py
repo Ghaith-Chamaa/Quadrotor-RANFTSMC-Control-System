@@ -92,6 +92,7 @@ class QuadrotorSimulator:
         states = np.zeros((N, 12))
         states_desired = np.zeros((N, 12))
         controls = np.zeros((N, 4))  # [U_T, U_phi, U_theta, U_psi]
+        sliding_surfaces = np.zeros((N, 6))  # [sigma_x, sigma_y, sigma_z, sigma_phi, sigma_theta, sigma_psi]
         
         if initial_conditions is not None:
             states[0, 0:3] = initial_conditions[0:3]  # position
@@ -167,8 +168,12 @@ class QuadrotorSimulator:
             # Attitude controller (inner loop)
             torques = self.controller.attitude_controller(
                 states[i], desired_angles, desired['yaw_dot'], desired['yaw_ddot'], dt)
-            
+
             controls[i] = [U_T, torques[0], torques[1], torques[2]]
+
+            # Store sliding surfaces
+            sliding_surfaces[i, 0:3] = self.controller.sigma_pos
+            sliding_surfaces[i, 3:6] = self.controller.sigma_att
             
             # Update dynamics (Runge-Kutta 4th order)
             k1 = self.dynamics(states[i], U_T, torques, disturbances)
@@ -188,5 +193,5 @@ class QuadrotorSimulator:
         if verbose:
             print(f"\nSimulation completed in {sim_time:.2f}s")
             print(f"Real-time factor: {T_sim/sim_time:.1f}x")
-        
-        return t_vec, states, states_desired, controls
+
+        return t_vec, states, states_desired, controls, sliding_surfaces

@@ -132,7 +132,7 @@ Examples:
     simulator = QuadrotorSimulator(quad_params, controller)
     
     print("Starting simulation...")
-    t, states, states_desired, controls = simulator.simulate(
+    t, states, states_desired, controls, sliding_surfaces = simulator.simulate(
         trajectory_type=args.trajectory,
         disturbance_type=args.disturbance,
         initial_conditions=initial_conditions,
@@ -147,20 +147,18 @@ Examples:
     
     print("\nGenerating plots...")
     scenario_label = f"Simulation {args.scenario[-1]}" if args.scenario else None
-    fig_main = Plotter.plot_results(
-        t, states, states_desired, controls, 
-        args.trajectory, args.disturbance, metrics, scenario_label)
-    
-    fig_errors = Plotter.plot_errors(t, states, states_desired)
-    
+
+    # Generate comprehensive analysis plot with sliding surfaces
+    fig_comprehensive = Plotter.plot_comprehensive_analysis(
+        t, states, states_desired, controls, sliding_surfaces,
+        args.trajectory, args.disturbance, scenario_label)
+
     if args.save:
-        print(f"\nSaving plots to {args.save}...")
-        fig_main.savefig(args.save, dpi=300, bbox_inches='tight')
-        error_filename = args.save.replace('.png', '_errors.png')
-        fig_errors.savefig(error_filename, dpi=300, bbox_inches='tight')
-        print(f"Saved: {args.save}, {error_filename}")
+        print(f"\nSaving plot to {args.save}...")
+        fig_comprehensive.savefig(args.save, dpi=300, bbox_inches='tight')
+        print(f"Saved: {args.save}")
     else:
-        print("\nDisplaying plots... (close windows to exit)")
+        print("\nDisplaying plot... (close window to exit)")
         plt.show()
     
     print("\n" + "="*70)

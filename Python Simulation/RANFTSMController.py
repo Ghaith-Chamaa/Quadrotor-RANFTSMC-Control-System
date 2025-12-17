@@ -12,15 +12,19 @@ class RANFTSMController:
     def __init__(self, quad_params: QuadrotorParams, ctrl_params: ControllerParams):
         self.qp = quad_params
         self.cp = ctrl_params
-        
+
         self.a_hat_pos = np.zeros((3, 3))  # [a0, a1, a2] for [x, y, z]
         self.a_hat_att = np.zeros((3, 3))  # [a0, a1, a2] for [phi, theta, psi]
-        
+
         self.prev_error_pos = np.zeros(3)
         self.prev_error_vel = np.zeros(3)
         self.prev_error_att = np.zeros(3)
         self.prev_error_rate = np.zeros(3)
         self.prev_time = 0.0
+
+        # Store sliding surfaces for plotting
+        self.sigma_pos = np.zeros(3)  # Position sliding surfaces [sigma_x, sigma_y, sigma_z]
+        self.sigma_att = np.zeros(3)  # Attitude sliding surfaces [sigma_phi, sigma_theta, sigma_psi]
     
     def _sign(self, x: float, epsilon: float = 0.1) -> float:
         """Smooth sign function using tanh to avoid chattering"""
@@ -49,10 +53,13 @@ class RANFTSMController:
         
         for i in range(3):
             # Sliding surface (Eq. 26)
-            sigma = (e_pos[i] + 
+            sigma = (e_pos[i] +
                     self.cp.bn * np.abs(e_pos[i])**self.cp.alpha_n * np.sign(e_pos[i]) +
                     self.cp.bn_plus1 * np.abs(e_vel[i])**self.cp.beta_n * np.sign(e_vel[i]))
-            
+
+            # Store sliding surface for plotting
+            self.sigma_pos[i] = sigma
+
             # Adaptive parameter updates (Eqs. 44-46)
             self.a_hat_pos[i, 0] += self.cp.mu0n * np.abs(sigma) * np.abs(e_vel[i])**(self.cp.beta_n - 1) * dt
             self.a_hat_pos[i, 1] += self.cp.mu1n * np.abs(sigma) * np.abs(e_pos[i]) * np.abs(e_vel[i])**(self.cp.beta_n - 1) * dt
@@ -127,10 +134,13 @@ class RANFTSMController:
         
         for i in range(3):
             # Sliding surface (Eq. 56)
-            sigma = (e_att[i] + 
+            sigma = (e_att[i] +
                     self.cp.bj * np.abs(e_att[i])**self.cp.alpha_j * np.sign(e_att[i]) +
                     self.cp.bj_plus1 * np.abs(e_rate[i])**self.cp.beta_j * np.sign(e_rate[i]))
-            
+
+            # Store sliding surface for plotting
+            self.sigma_att[i] = sigma
+
             # Adaptive updates (Eqs. 60-62)
             self.a_hat_att[i, 0] += self.cp.mu0j * np.abs(sigma) * np.abs(e_rate[i])**(self.cp.beta_j - 1) * dt
             self.a_hat_att[i, 1] += self.cp.mu1j * np.abs(sigma) * np.abs(e_att[i]) * np.abs(e_rate[i])**(self.cp.beta_j - 1) * dt

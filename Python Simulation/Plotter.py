@@ -125,3 +125,113 @@ class Plotter:
         
         plt.tight_layout()
         return fig
+
+    @staticmethod
+    def plot_comprehensive_analysis(t: np.ndarray, states: np.ndarray, states_desired: np.ndarray,
+                                    controls: np.ndarray, sliding_surfaces: np.ndarray,
+                                    trajectory_type: str, disturbance_type: str, scenario_label: str = None):
+        """
+        Create comprehensive analysis plots similar to hardware.png
+        Includes: 3D trajectory, position tracking, velocity commands, sliding surfaces, and errors
+        Multi-axis variables are overlayed on the same plot for better comparison
+        """
+        fig = plt.figure(figsize=(20, 14))
+        gs = GridSpec(4, 4, figure=fig, hspace=0.35, wspace=0.35)
+
+        # Row 0: 3D Trajectory (large) + X Position + Y Position
+        ax_3d = fig.add_subplot(gs[0:2, 0:2], projection='3d')
+        ax_3d.plot(states_desired[:, 0], states_desired[:, 1], states_desired[:, 2],
+                  'b--', linewidth=2, label='Desired', alpha=0.7)
+        ax_3d.plot(states[:, 0], states[:, 1], states[:, 2],
+                  'r-', linewidth=1.5, label='Actual', alpha=0.9)
+        ax_3d.scatter(states[0, 0], states[0, 1], states[0, 2],
+                     c='g', s=100, marker='o', label='Start', zorder=5)
+        ax_3d.scatter(states[-1, 0], states[-1, 1], states[-1, 2],
+                     c='m', s=100, marker='s', label='End', zorder=5)
+        ax_3d.set_xlabel('X (m)', fontsize=9)
+        ax_3d.set_ylabel('Y (m)', fontsize=9)
+        ax_3d.set_zlabel('Z (m)', fontsize=9)
+        ax_3d.set_title('3D Trajectory', fontsize=10, fontweight='bold')
+        ax_3d.legend(fontsize=7)
+        ax_3d.grid(True, alpha=0.3)
+
+        # X Position
+        ax_x = fig.add_subplot(gs[0, 2])
+        ax_x.plot(t, states_desired[:, 0], 'b--', linewidth=1.5, label='Desired', alpha=0.7)
+        ax_x.plot(t, states[:, 0], 'r-', linewidth=1.2, label='Actual', alpha=0.9)
+        ax_x.fill_between(t, states_desired[:, 0], states[:, 0], alpha=0.2, color='red')
+        ax_x.set_xlabel('Time (s)', fontsize=8)
+        ax_x.set_ylabel('X (m)', fontsize=8)
+        ax_x.set_title('X Position', fontsize=9, fontweight='bold')
+        ax_x.legend(fontsize=6)
+        ax_x.grid(True, alpha=0.3)
+
+        # Y Position
+        ax_y = fig.add_subplot(gs[0, 3])
+        ax_y.plot(t, states_desired[:, 1], 'b--', linewidth=1.5, label='Desired', alpha=0.7)
+        ax_y.plot(t, states[:, 1], 'r-', linewidth=1.2, label='Actual', alpha=0.9)
+        ax_y.fill_between(t, states_desired[:, 1], states[:, 1], alpha=0.2, color='red')
+        ax_y.set_xlabel('Time (s)', fontsize=8)
+        ax_y.set_ylabel('Y (m)', fontsize=8)
+        ax_y.set_title('Y Position', fontsize=9, fontweight='bold')
+        ax_y.legend(fontsize=6)
+        ax_y.grid(True, alpha=0.3)
+
+        # Row 1: Z Position + Attitude (Roll, Pitch, Yaw overlayed) + Control Commands
+        ax_z = fig.add_subplot(gs[1, 2])
+        ax_z.plot(t, states_desired[:, 2], 'b--', linewidth=1.5, label='Desired', alpha=0.7)
+        ax_z.plot(t, states[:, 2], 'r-', linewidth=1.2, label='Actual', alpha=0.9)
+        ax_z.fill_between(t, states_desired[:, 2], states[:, 2], alpha=0.2, color='red')
+        ax_z.set_xlabel('Time (s)', fontsize=8)
+        ax_z.set_ylabel('Z (m)', fontsize=8)
+        ax_z.set_title('Z Position', fontsize=9, fontweight='bold')
+        ax_z.legend(fontsize=6)
+        ax_z.grid(True, alpha=0.3)
+
+        # Control Commands (Thrust and Torques)
+        ax_controls = fig.add_subplot(gs[1, 3])
+        # Note: controls array has shape (N, 4) = [U_T, U_phi, U_theta, U_psi]
+        # Normalize thrust for better visualization alongside torques
+        thrust_normalized = (controls[:, 0] - controls[:, 0].mean()) / (controls[:, 0].std() + 1e-10)
+        ax_controls.plot(t, thrust_normalized, 'k-', linewidth=1.0, alpha=0.7, label='U_T (norm)')
+        ax_controls.plot(t, controls[:, 1], 'r-', linewidth=1.0, alpha=0.9, label='U_φ')
+        ax_controls.plot(t, controls[:, 2], 'g-', linewidth=1.0, alpha=0.9, label='U_θ')
+        ax_controls.plot(t, controls[:, 3], 'b-', linewidth=1.0, alpha=0.9, label='U_ψ')
+        ax_controls.set_xlabel('Time (s)', fontsize=8)
+        ax_controls.set_ylabel('Control', fontsize=8)
+        ax_controls.set_title('Control Commands', fontsize=9, fontweight='bold')
+        ax_controls.legend(fontsize=6, ncol=2, loc='best')
+        ax_controls.grid(True, alpha=0.3)
+
+        # Row 2: Position Sliding Surfaces (all overlayed) - spans full width
+        ax_sigma_pos = fig.add_subplot(gs[2, 0:4])
+        ax_sigma_pos.plot(t, sliding_surfaces[:, 0], 'r-', linewidth=1.2, alpha=0.9, label='σ_x')
+        ax_sigma_pos.plot(t, sliding_surfaces[:, 1], 'g-', linewidth=1.2, alpha=0.9, label='σ_y')
+        ax_sigma_pos.plot(t, sliding_surfaces[:, 2], 'b-', linewidth=1.2, alpha=0.9, label='σ_z')
+        ax_sigma_pos.axhline(y=0, color='k', linestyle='--', linewidth=0.8, alpha=0.5)
+        ax_sigma_pos.set_xlabel('Time (s)', fontsize=8)
+        ax_sigma_pos.set_ylabel('σ', fontsize=8)
+        ax_sigma_pos.set_title('Position Sliding Surfaces (X, Y, Z)', fontsize=9, fontweight='bold')
+        ax_sigma_pos.legend(fontsize=6, ncol=3, loc='best')
+        ax_sigma_pos.grid(True, alpha=0.3)
+
+        # Row 3: Position Errors (all overlayed) - spans full width
+        errors = states[:, 0:3] - states_desired[:, 0:3]
+        ax_err_pos = fig.add_subplot(gs[3, 0:4])
+        ax_err_pos.plot(t, errors[:, 0], 'r-', linewidth=1.2, alpha=0.9, label='e_x')
+        ax_err_pos.plot(t, errors[:, 1], 'g-', linewidth=1.2, alpha=0.9, label='e_y')
+        ax_err_pos.plot(t, errors[:, 2], 'b-', linewidth=1.2, alpha=0.9, label='e_z')
+        ax_err_pos.axhline(y=0, color='k', linestyle='--', linewidth=0.8, alpha=0.5)
+        ax_err_pos.set_xlabel('Time (s)', fontsize=8)
+        ax_err_pos.set_ylabel('Error (m)', fontsize=8)
+        ax_err_pos.set_title('Position Errors (X, Y, Z)', fontsize=9, fontweight='bold')
+        ax_err_pos.legend(fontsize=6, ncol=3, loc='best')
+        ax_err_pos.grid(True, alpha=0.3)
+
+        # Title
+        main_title = f'RANFTSMC - {trajectory_type.upper()} Controller'
+        if scenario_label:
+            main_title = f'{scenario_label}: ' + main_title
+        plt.suptitle(main_title, fontsize=14, fontweight='bold', y=0.995)
+
+        return fig
